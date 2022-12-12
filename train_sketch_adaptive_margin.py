@@ -23,15 +23,15 @@ from loss.magface import MagFaceLoss
 
 parser = argparse.ArgumentParser("Sketch_View Modality")
 # dataset
-parser.add_argument('--sketch-datadir', type=str, default='/mnt/Dataset/1_views/13_sketch_train_picture')
-parser.add_argument('--val-sketch-datadir', type=str, default='/mnt/Dataset/1_views/13_sketch_test_picture')
+parser.add_argument('--sketch-datadir', type=str, default='E:\\3d_retrieval\\Dataset\\Shrec_13\\1_views/13_sketch_train_picture')
+parser.add_argument('--val-sketch-datadir', type=str, default='E:\\3d_retrieval\\Dataset\\Shrec_13\\1_views/13_sketch_test_picture')
 # parser.add_argument('--sketch-datadir', type=str, default='/mnt/Dataset/Shrec_14/14_sketch_picture')
 # parser.add_argument('--val-sketch-datadir', type=str, default='/mnt/Dataset/Shrec_14/14_sketch_test_picture')
-parser.add_argument('--view-datadir', type=str, default='/mnt/Dataset/Shrec_14/1_view/14_view_render_img')
-#parser.add_argument('--view-datadir', type=str, default='E:\\3d_retrieval\\Dataset\\Shrec_13\\1_views\\13_view_render_img')
+#parser.add_argument('--view-datadir', type=str, default='/mnt/Dataset/Shrec_14/1_view/14_view_render_img')
+parser.add_argument('--view-datadir', type=str, default='E:\\3d_retrieval\\Dataset\\Shrec_13\\1_views\\13_view_render_img')
 parser.add_argument('--workers', default=4, type=int,help="number of data loading workers (default: 0)")
 # optimization
-parser.add_argument('--sketch-batch-size', type=int, default=64)
+parser.add_argument('--sketch-batch-size', type=int, default=4)
 parser.add_argument('--view-batch-size', type=int, default=16)
 parser.add_argument('--num-classes', type=int, default=90)
 parser.add_argument('--lr-backbone', type=float, default=4e-4, help="learning rate for backbone")
@@ -43,7 +43,7 @@ parser.add_argument('--img-size', type=int, default=224, help="image size")
 parser.add_argument('--alph', type=float, default=12, help="L2 alph")
 
 # model
-parser.add_argument('--model', type=str, choices=['alexnet', 'vgg16', 'vgg19','resnet50','inceptionresnetv2'], default='resnest50')
+parser.add_argument('--model', type=str, choices=['alexnet', 'vgg16', 'vgg19','resnet50','inceptionresnetv2'], default='resnet50')
 parser.add_argument('--pretrain', type=bool, choices=[True, False], default=True)
 parser.add_argument('--loss', type=bool, choices=["cosface", "arcface","mag","ada"], default="cosface")
 parser.add_argument('--use-mixup', type=bool, choices=[True, False], default=False, help="mixup")
