@@ -45,7 +45,7 @@ parser.add_argument('--alph', type=float, default=12, help="L2 alph")
 # model
 parser.add_argument('--model', type=str, choices=['alexnet', 'vgg16', 'vgg19','resnet50','inceptionresnetv2'], default='resnet50')
 parser.add_argument('--pretrain', type=bool, choices=[True, False], default=True)
-parser.add_argument('--loss', type=bool, choices=["cosface", "arcface","mag","ada"], default="cosface")
+parser.add_argument('--loss', type=str, choices=["cosface", "arcface","mag","ada"], default="cosface")
 parser.add_argument('--use-mixup', type=bool, choices=[True, False], default=False, help="mixup")
 # misc
 parser.add_argument('--print-freq', type=int, default=10)
@@ -56,10 +56,8 @@ parser.add_argument('--model-dir', type=str,default='./saved_model/ResNest50_13/
 parser.add_argument('--count', type=int, default=0)
 
 # amsoftmax
-parser.add_argument('--margin', default=0.5, type=float,
-                    help='lower bound of feature norm')
-parser.add_argument('--scale', default=10, type=float,
-                    help='lower bound of feature norm')
+parser.add_argument('--margin', default=0.5, type=float)
+parser.add_argument('--scale', default=15.0, type=float)
 
 # magface
 parser.add_argument('--l_a', default=10, type=float,
@@ -76,6 +74,14 @@ parser.add_argument('--lamada', default=10, type=float,
 args = parser.parse_args()
 writer = SummaryWriter()
 
+def get_loss(loss_name):
+
+    if loss_name=="cosface":
+        loss=AMSoftMaxLoss(scale=args.scale,margin=args.margin)
+    elif loss_name=="mag":
+        loss=MagFaceLoss(scale=args.scale,l_a=args.l_a,u_a=args.u_a,l_m=args.l_m,u_m=args.u_m,lamada=args.lamada)
+
+    return loss
 
 def get_data(sketch_datadir,val_sketch_datadir):
     """Image reading and image augmentation
@@ -84,13 +90,8 @@ def get_data(sketch_datadir,val_sketch_datadir):
     """
     image_transforms = transforms.Compose([
         transforms.Resize(args.img_size),
-        #transforms.RandomRotation(degrees=15),
-        #transforms.ColorJitter(),  # Randomly change the brightness, contrast, and saturation of the image
         transforms.RandomHorizontalFlip(),
         transforms.TrivialAugmentWide(),
-        #transforms.RandomVerticalFlip(),
-        # transforms.RandomCrop(224),
-        # transforms.CenterCrop(size=224),
         transforms.ToTensor(),
         transforms.Normalize([0.5, 0.5, 0.5],
                              [0.5, 0.5, 0.5])])  # Imagenet standards
@@ -226,15 +227,13 @@ def main():
     if use_gpu:
         sketch_model = nn.DataParallel(sketch_model).cuda()
         classifier = nn.DataParallel(classifier).cuda()
-    
-#     sketch_model.load_state_dict(torch.load(args.model_dir + '/' + args.model+'_best_baseline_sketch_model'  +  '.pth'))
-#     classifier.load_state_dict(torch.load(args.model_dir + '/' + args.model+ '_best_baseline_sketch_classifier' + '.pth'))
-    #criterion_am = AMSoftMaxLoss(margin=0.0)
-    criterion_am =MagFaceLoss(l_a=args.l_a,u_a=args.u_a,l_m=args.l_m,u_m=args.u_m,lamada=args.lamada)
+
+    criterion= get_loss(args.loss)
 
 
     optimizer_model = torch.optim.SGD([{"params": sketch_model.parameters(),"lr":args.lr_backbone},
-                                       {"params": classifier.parameters(),"lr":args.lr_classifier}], momentum=0.9, weight_decay=2e-5)
+                                       {"params": classifier.parameters(),"lr":args.lr_classifier}],
+                                      momentum=0.9, weight_decay=2e-5)
 
     scheduler = lr_scheduler.CosineAnnealingLR(optimizer_model,T_max=args.max_epoch, last_epoch=-1)
 
@@ -244,7 +243,7 @@ def main():
         print("++++++++++++++++++++++++++")
         # save model
 
-        avg_acc = train_sketch(sketch_model, classifier,criterion_am,optimizer_model, sketch_trainloader, use_gpu)
+        avg_acc = train_sketch(sketch_model, classifier,criterion,optimizer_model, sketch_trainloader, use_gpu)
 
         val_acc=val(sketch_model,classifier, val_sketch_dataloader,use_gpu)
         print("\tVal Accuracy: %.4f" % (val_acc))

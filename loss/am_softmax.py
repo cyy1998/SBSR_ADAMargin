@@ -35,7 +35,7 @@ class AMSoftMaxLoss:
         self.margin = margin
         self.reduction = reduction
 
-    def __call__(self, logits: torch.Tensor, targets: torch.LongTensor) -> torch.Tensor:
+    def __call__(self, logits: torch.Tensor,feature_norms: torch.Tensor, targets: torch.LongTensor) -> torch.Tensor:
         """call function as forward
 
         Args:
