@@ -61,7 +61,7 @@ class MagFaceLoss:
         loss_g = self.calc_loss_G(feature_norms)
         one_hot_labels = torch.zeros_like(logits).scatter_(dim=1, index=targets.unsqueeze(1), value=1.0)
         resverse_one_hot_labels=1-one_hot_labels
-        am_logits = self.scale * (logits - one_hot_labels * margin)#+self.mm*resverse_one_hot_labels)
+        am_logits = self.scale * (logits - one_hot_labels * margin)
         #am_logits = self.scale * (logits)
         loss= cross_entropy(input=am_logits, target=targets, reduction=self.reduction,label_smoothing=0.1)
         return loss+self.lamada*loss_g
