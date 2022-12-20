@@ -1,0 +1,1 @@
+python ../train_sketch.py --sketch-datadir "/mnt/Dataset/1_views/13_sketch_train_picture" --val-sketch-datadir "/mnt/Dataset/1_views/13_sketch_test_picture" --num-classes 90 --loss "arcface" --margin 1.0 --easy_margin false --model-dir "../saved_models/Shrec13/ResNet50_arcface"

@@ -39,8 +39,8 @@ class SketchModel(nn.Module):
             self.feature_size = self.model.classifier[6].in_features
             del self.model.classifier[6]
         elif backbone == 'resnet50':
-            self.model=models.resnet50(pretrained=pretrain)
-            #self.model = timm.create_model('resnet50d', pretrained=True)
+            #self.model=models.resnet50(pretrained=pretrain)
+            self.model = timm.create_model('resnet50d', pretrained=True)
             self.feature_size = self.model.fc.in_features
             self.model = nn.Sequential(*list(self.model.children())[:-1])
             # del self.model.fc

@@ -32,7 +32,7 @@ parser.add_argument('--val-sketch-datadir', type=str, default='E:\\3d_retrieval\
 parser.add_argument('--view-datadir', type=str, default='E:\\3d_retrieval\\Dataset\\Shrec_13\\1_views\\13_view_render_img')
 parser.add_argument('--workers', default=4, type=int,help="number of data loading workers (default: 0)")
 # optimization
-parser.add_argument('--sketch-batch-size', type=int, default=4)
+parser.add_argument('--sketch-batch-size', type=int, default=64)
 parser.add_argument('--view-batch-size', type=int, default=16)
 parser.add_argument('--num-classes', type=int, default=90)
 parser.add_argument('--lr-backbone', type=float, default=4e-4, help="learning rate for backbone")
@@ -48,7 +48,7 @@ parser.add_argument('--alph', type=float, default=12, help="L2 alph")
 parser.add_argument('--model', type=str, choices=['alexnet', 'vgg16', 'vgg19','resnet50','inceptionresnetv2'], default='resnet50')
 parser.add_argument('--pretrain', type=bool, choices=[True, False], default=True)
 parser.add_argument('--loss', type=str, choices=["cosface", "arcface","mag","ada"], default="arcface")
-parser.add_argument('--use-mixup', type=bool, choices=[True, False], default=False, help="mixup")
+parser.add_argument('--use-mixup', type=bool, choices=[True, False], default=True, help="mixup")
 # misc
 parser.add_argument('--print-freq', type=int, default=10)
 parser.add_argument('--save-model-freq', type=int, default=10)
@@ -60,7 +60,7 @@ parser.add_argument('--count', type=int, default=0)
 # amsoftmax/arcface
 parser.add_argument('--margin', default=0.5, type=float)
 parser.add_argument('--scale', default=15.0, type=float)
-
+parser.add_argument('--easy_margin', default=False, type=bool)
 # magface
 parser.add_argument('--l_a', default=10, type=float,
                     help='lower bound of feature norm')
@@ -81,7 +81,7 @@ def get_loss(loss_name):
     if loss_name=="cosface":
         loss=AMSoftMaxLoss(scale=args.scale,margin=args.margin)
     elif loss_name=="arcface":
-        loss=ArcFaceLoss(scale=args.scale,margin=args.margin)
+        loss=ArcFaceLoss(scale=args.scale,margin=args.margin,easy_margin=args.easy_margin)
     elif loss_name=="mag":
         loss=MagFaceLoss(scale=args.scale,l_a=args.l_a,u_a=args.u_a,l_m=args.l_m,u_m=args.u_m,lamada=args.lamada)
 
