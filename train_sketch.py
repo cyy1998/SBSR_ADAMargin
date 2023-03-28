@@ -21,7 +21,8 @@ from model.uncer_classifer import L2Classifier
 from loss.am_softmax import AMSoftMaxLoss
 from loss.magface import MagFaceLoss
 from loss.arcface import ArcFaceLoss
-from  loss.adaface import AdaFaceLoss
+from loss.adaface import AdaFaceLoss
+from loss.sketchmag import SketchMagLoss
 
 parser = argparse.ArgumentParser("Sketch_View Modality")
 # dataset
@@ -48,7 +49,7 @@ parser.add_argument('--alph', type=float, default=12, help="L2 alph")
 # model
 parser.add_argument('--model', type=str, choices=['alexnet', 'vgg16', 'vgg19','resnet50','inceptionresnetv2'], default='resnet50')
 parser.add_argument('--pretrain', type=bool, choices=[True, False], default=True)
-parser.add_argument('--loss', type=str, choices=["cosface", "arcface","mag","ada"], default="ada")
+parser.add_argument('--loss', type=str, choices=["cosface", "arcface","mag","ada"], default="sketchmag")
 parser.add_argument('--use-mixup', type=bool, choices=[True, False], default=True, help="mixup")
 # misc
 parser.add_argument('--print-freq', type=int, default=10)
@@ -87,6 +88,8 @@ def get_loss(loss_name):
         loss=MagFaceLoss(scale=args.scale,l_a=args.l_a,u_a=args.u_a,l_m=args.l_m,u_m=args.u_m,lamada=args.lamada)
     elif loss_name=="ada":
         loss=AdaFaceLoss(scale=args.scale,margin=args.margin)
+    elif loss_name == "sketchmag":
+        loss = SketchMagLoss(scale=args.scale, margin=args.margin)
 
     return loss
 
@@ -171,7 +174,7 @@ def train_sketch(sketch_model, classifier, criterion_am,optimizer_model,sketch_d
 
         feature, logits = classifier.forward(sketch_features)
         x_norm=torch.norm(feature, dim=1, keepdim=True).clamp(args.l_a, args.u_a)
-        
+
         if args.use_mixup:
             cls_loss = lam * criterion_am(logits,x_norm,sketch_labels)+(1-lam)*criterion_am(logits,x_norm,sketch_labels[index])
         else:
