@@ -28,13 +28,14 @@ parser = argparse.ArgumentParser("Sketch_View Modality")
 # dataset
 parser.add_argument('--sketch-datadir', type=str, default='E:\\3d_retrieval\\Dataset\\Shrec_13\\1_views/13_sketch_train_picture')
 parser.add_argument('--val-sketch-datadir', type=str, default='E:\\3d_retrieval\\Dataset\\Shrec_13\\1_views/13_sketch_test_picture')
+parser.add_argument('--matrix_path', type=str, default='./extract_features/label_matrix.mat')
 # parser.add_argument('--sketch-datadir', type=str, default='/mnt/Dataset/Shrec_14/14_sketch_picture')
 # parser.add_argument('--val-sketch-datadir', type=str, default='/mnt/Dataset/Shrec_14/14_sketch_test_picture')
 #parser.add_argument('--view-datadir', type=str, default='/mnt/Dataset/Shrec_14/1_view/14_view_render_img')
 parser.add_argument('--view-datadir', type=str, default='E:\\3d_retrieval\\Dataset\\Shrec_13\\1_views\\13_view_render_img')
 parser.add_argument('--workers', default=4, type=int,help="number of data loading workers (default: 0)")
 # optimization
-parser.add_argument('--sketch-batch-size', type=int, default=4)
+parser.add_argument('--sketch-batch-size', type=int, default=128)
 parser.add_argument('--view-batch-size', type=int, default=16)
 parser.add_argument('--num-classes', type=int, default=90)
 parser.add_argument('--lr-backbone', type=float, default=4e-4, help="learning rate for backbone")
@@ -47,9 +48,9 @@ parser.add_argument('--img-size', type=int, default=224, help="image size")
 parser.add_argument('--alph', type=float, default=12, help="L2 alph")
 
 # model
-parser.add_argument('--model', type=str, choices=['alexnet', 'vgg16', 'vgg19','resnet50','inceptionresnetv2'], default='resnet50')
+parser.add_argument('--model', type=str, choices=['alexnet', 'vgg16', 'resnet34','resnet50','inceptionresnetv2',"resnest50","seresnet50","resnet101"], default='resnet50')
 parser.add_argument('--pretrain', type=bool, choices=[True, False], default=True)
-parser.add_argument('--loss', type=str, choices=["cosface", "arcface","mag","ada"], default="sketchmag")
+parser.add_argument('--loss', type=str, choices=["cosface", "arcface","sketchmag","ada"], default="sketchmag")
 parser.add_argument('--use-mixup', type=bool, choices=[True, False], default=True, help="mixup")
 # misc
 parser.add_argument('--print-freq', type=int, default=10)
@@ -58,9 +59,11 @@ parser.add_argument('--gpu', type=str, default='0,1,2,3')
 parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--model-dir', type=str,default='./saved_model/ResNest50_13/cls_uncer')
 parser.add_argument('--count', type=int, default=0)
+parser.add_argument('--save-model', type=bool, default=True)
 
 # amsoftmax/arcface
 parser.add_argument('--margin', default=0.5, type=float)
+parser.add_argument('--sem_margin', default=0.5, type=float)
 parser.add_argument('--scale', default=15.0, type=float)
 parser.add_argument('--easy_margin', default=False, type=bool)
 # magface
@@ -89,7 +92,7 @@ def get_loss(loss_name):
     elif loss_name=="ada":
         loss=AdaFaceLoss(scale=args.scale,margin=args.margin)
     elif loss_name == "sketchmag":
-        loss = SketchMagLoss(scale=args.scale, margin=args.margin)
+        loss = SketchMagLoss(scale=args.scale, margin=args.margin,sem_margin=args.sem_margin,c_sim=args.matrix_path)
 
     return loss
 
@@ -252,7 +255,10 @@ def main():
         print("\tVal Accuracy: %.4f" % (val_acc))
         print("\tBest Val Accuracy: %.4f" % (best_acc))
 
-        if val_acc>best_acc and val_acc>0.8:
+        if val_acc>best_acc and val_acc>0.8 and args.save_model:
+            if not os.path.exists(args.model_dir):
+                os.mkdir(args.model_dir)
+                
             best_acc=val_acc
             torch.save(sketch_model.state_dict(),
                        args.model_dir + '/' +args.model+'_best_baseline_sketch_model' + '.pth')

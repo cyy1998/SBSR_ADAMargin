@@ -4,7 +4,7 @@ import math
 
 class SketchMagLoss:
 
-    def __init__(self, scale: float = 15.0, margin: float = 0.35,h=0.333, t_alpha=0.99, reduction: str = "mean",c_sim: str= "./extract_features/label_matrix.mat") -> None:
+    def __init__(self, scale: float = 15.0, margin: float = 0.35,sem_margin: float = 0.35,h=0.333, t_alpha=0.99, reduction: str = "mean",c_sim: str= "./extract_features/label_matrix.mat") -> None:
         self.scale = torch.tensor(scale,requires_grad=True)
         self.margin = margin
         self.eps = 1e-3
@@ -19,7 +19,7 @@ class SketchMagLoss:
         self.batch_mean=torch.ones(1).cuda()*20
         self.batch_std=torch.ones(1).cuda()*100
         self.c_sim= torch.tensor(torch.load(c_sim)).cuda()
-        self.c_sim=0.8*(torch.max(self.c_sim)-self.c_sim)/(torch.max(self.c_sim)-torch.min(self.c_sim))
+        self.c_sim=sem_margin*(torch.max(self.c_sim)-self.c_sim)/(torch.max(self.c_sim)-torch.min(self.c_sim))
 
 
 

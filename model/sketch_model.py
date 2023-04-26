@@ -44,9 +44,9 @@ class SketchModel(nn.Module):
             self.feature_size = self.model.fc.in_features
             self.model = nn.Sequential(*list(self.model.children())[:-1])
             # del self.model.fc
-        elif backbone == 'resnet50_176':
+        elif backbone == 'seresnet50':
             #self.model=models.resnet50(pretrained=pretrain)
-            self.model = timm.create_model('resnet50', pretrained='~/.cache/torch/hub/checkpoints/resnet50_a1h2_176-001a1197.pth')
+            self.model = timm.create_model('seresnet50', pretrained=True)
             self.feature_size = self.model.fc.in_features
             self.model = nn.Sequential(*list(self.model.children())[:-1])
             # del self.model.fc
@@ -56,9 +56,15 @@ class SketchModel(nn.Module):
             self.feature_size = self.model.fc.in_features
             self.model = nn.Sequential(*list(self.model.children())[:-1])
             # del self.model.fc
-        elif backbone == 'resnest101':
+        elif backbone == 'resnet101':
             #self.model=models.resnet50(pretrained=pretrain)
-            self.model = timm.create_model('resnest101e', pretrained=True)
+            self.model = timm.create_model('resnet101d', pretrained=True)
+            self.feature_size = self.model.fc.in_features
+            self.model = nn.Sequential(*list(self.model.children())[:-1])
+            # del self.model.fc
+        elif backbone == 'resnet34':
+            #self.model=models.resnet50(pretrained=pretrain)
+            self.model = timm.create_model('resnet34d', pretrained=True)
             self.feature_size = self.model.fc.in_features
             self.model = nn.Sequential(*list(self.model.children())[:-1])
             # del self.model.fc

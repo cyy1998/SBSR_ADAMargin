@@ -14,9 +14,9 @@ class Classifier(nn.Module):
 
         #self.fc1 = nn.Sequential(nn.Linear(self.feature_size, num_classes))
         self.fc1 = nn.Sequential(nn.Linear(self.feature_size, 1024),nn.BatchNorm1d(1024,eps=2e-5),nn.ReLU())
-        self.fc4 = nn.Sequential(nn.Linear(1024, 768),nn.BatchNorm1d(768,eps=2e-5))
+        self.fc4 = nn.Sequential(nn.Linear(1024, 256),nn.BatchNorm1d(256,eps=2e-5))
 
-        self.fc5 = TransformEmbeddingToLogit(in_features=768,
+        self.fc5 = TransformEmbeddingToLogit(in_features=256,
                                             out_features=self.num_classes,
                                             embedding_normalization=True,
                                             weight_normalization=True)
